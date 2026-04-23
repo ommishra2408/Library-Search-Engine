@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .table th { background-color: #007bff; color: white; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-success:hover { background-color: #28a745; }
+        .search-bar { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-book"></i> Library Management System</h1>
+
+        <!-- Search Bar -->
+        <div class="card search-bar">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" id="searchTitle" class="form-control" placeholder="Search by Title">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="searchAuthor" class="form-control" placeholder="Search by Author">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="searchGenre" class="form-control" placeholder="Search by Genre">
+                    </div>
+                    <div class="col-md-3">
+                        <button id="searchBtn" class="btn btn-primary w-100"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </div>
+                <button id="showAllBtn" class="btn btn-secondary mt-2"><i class="fas fa-list"></i> Show All</button>
+            </div>
+        </div>
+
+        <!-- Add/Edit Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-plus"></i> Add/Edit Book</h5>
+            </div>
+            <div class="card-body">
+                <form id="bookForm">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input type="number" id="bookId" class="form-control" placeholder="ID" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" id="title" class="form-control" placeholder="Title" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" id="author" class="form-control" placeholder="Author" required>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" id="genre" class="form-control" placeholder="Genre" required>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" id="year" class="form-control" placeholder="Year" required>
+                        </div>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="available">
+                        <label class="form-check-label" for="available">Available</label>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn btn-success mt-3"><i class="fas fa-save"></i> Add Book</button>
+                    <button type="button" id="clearBtn" class="btn btn-warning mt-3 ms-2"><i class="fas fa-eraser"></i> Clear</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Books Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-table"></i> Books List</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="booksTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booksBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8080/api/books';
+
+        // Load all books on page load
+        document.addEventListener('DOMContentLoaded', loadBooks);
+
+        // Search functionality
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const title = document.getElementById('searchTitle').value;
+            const author = document.getElementById('searchAuthor').value;
+            const genre = document.getElementById('searchGenre').value;
+            searchBooks(title, author, genre);
+        });
+
+        document.getElementById('showAllBtn').addEventListener('click', loadBooks);
+
+        // Form submission
+        document.getElementById('bookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const book = {
+                bookId: parseInt(document.getElementById('bookId').value),
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                genre: document.getElementById('genre').value,
+                year: parseInt(document.getElementById('year').value),
+                availability: document.getElementById('available').checked
+            };
+            await addBook(book);
+            loadBooks();
+            clearForm();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', clearForm);
+
+        async function loadBooks() {
+            try {
+                const response = await fetch(API_BASE);
+                const books = await response.json();
+                displayBooks(books);
+            } catch (error) {
+                console.error('Error loading books:', error);
+            }
+        }
+
+        async function searchBooks(title, author, genre) {
+            try {
+                const params = new URLSearchParams();
+                if (title) params.append('title', title);
+                if (author) params.append('author', author);
+                if (genre) params.append('genre', genre);
+                const response = await fetch(`${API_BASE}/search?${params}`);
+                const books = await response.json();
+                displayBooks(books);
+            } catch (error) {
+                console.error('Error searching books:', error);
+            }
+        }
+
+        async function addBook(book) {
+            try {
+                await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(book)
+                });
+            } catch (error) {
+                console.error('Error adding book:', error);
+            }
+        }
+
+        async function updateBook(book) {
+            try {
+                await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(book)
+                });
+            } catch (error) {
+                console.error('Error updating book:', error);
+            }
+        }
+
+        async function deleteBook(id) {
+            if (confirm('Are you sure you want to delete this book?')) {
+                try {
+                    await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                    loadBooks();
+                } catch (error) {
+                    console.error('Error deleting book:', error);
+                }
+            }
+        }
+
+        function displayBooks(books) {
+            const tbody = document.getElementById('booksBody');
+            tbody.innerHTML = '';
+            books.forEach(book => {
+                const row = `
+                    <tr>
+                        <td>${book.bookId}</td>
+                        <td>${book.title}</td>
+                        <td>${book.author}</td>
+                        <td>${book.genre}</td>
+                        <td>${book.year}</td>
+                        <td><span class="badge ${book.availability ? 'bg-success' : 'bg-danger'}">${book.availability ? 'Available' : 'Issued'}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" onclick="editBook(${book.bookId}, '${book.title}', '${book.author}', '${book.genre}', ${book.year}, ${book.availability})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.bookId})"><i class="fas fa-trash"></i> Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function editBook(id, title, author, genre, year, availability) {
+            document.getElementById('bookId').value = id;
+            document.getElementById('title').value = title;
+            document.getElementById('author').value = author;
+            document.getElementById('genre').value = genre;
+            document.getElementById('year').value = year;
+            document.getElementById('available').checked = availability;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Book';
+            document.getElementById('bookForm').addEventListener('submit', handleUpdate);
+        }
+
+        async function handleUpdate(e) {
+            e.preventDefault();
+            const book = {
+                bookId: parseInt(document.getElementById('bookId').value),
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                genre: document.getElementById('genre').value,
+                year: parseInt(document.getElementById('year').value),
+                availability: document.getElementById('available').checked
+            };
+            await updateBook(book);
+            loadBooks();
+            clearForm();
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Add Book';
+            document.getElementById('bookForm').removeEventListener('submit', handleUpdate);
+        }
+
+        function clearForm() {
+            document.getElementById('bookForm').reset();
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Add Book';
+        }
+    </script>
+</body>
+</html>

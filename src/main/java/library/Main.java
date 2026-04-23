@@ -1,52 +1,14 @@
 package library;
 
-import java.util.List;
-import java.util.Scanner;
-import java.io.IOException;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Main {
-    private static LibraryDAO dao = new LibraryDAO();
-    private static Scanner scanner = new Scanner(System.in);
-
     public static void main(String[] args) {
-        while (true) {
-            System.out.println("\n--- MODE SELECTION ---");
-            System.out.println("1. Launch Graphical UI (Recommended)");
-            System.out.println("2. Continue in Terminal/CLI");
-            System.out.println("3. Exit");
-            System.out.print("Selection: ");
-            
-            int mode = readInt();
-            if (mode == 1) {
-                launchGUI();
-                break; 
-            } else if (mode == 2) {
-                runCLI();
-            } else {
-                System.exit(0);
-            }
-        }
+        SpringApplication.run(Main.class, args);
     }
-
-    private static void launchGUI() {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) {}
-        SwingUtilities.invokeLater(() -> new LibraryUI().setVisible(true));
-    }
-
-    private static void runCLI() {
-        while (true) {
-            System.out.println("\n=== Library Management System ===");
-            System.out.println("1. Search Books");
-            System.out.println("2. Add New Book");
-            System.out.println("3. View All Books");
-            System.out.println("4. Update Book Details");
-            System.out.println("5. Delete Book");
-            System.out.println("6. Check Availability");
-            System.out.println("7. Export to CSV");
-            System.out.println("8. Exit");
-            System.out.print("Choose an option: ");
+}
 
             int choice = readInt();
 
