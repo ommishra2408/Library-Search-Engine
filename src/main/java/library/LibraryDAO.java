@@ -3,7 +3,9 @@ package library;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LibraryDAO {
     public void addBook(Book book) {
         String sql = "INSERT INTO books (book_id, title, author, genre, year, availability) VALUES (?, ?, ?, ?, ?, ?)";
