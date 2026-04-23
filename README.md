@@ -17,11 +17,11 @@ This is a **Library Search Engine** application built with Java and MySQL. It pr
 
 ## 🛠️ Prerequisites
 
-| Requirement | Version | Description |
+| Requirement | Version | Description |java -cp "src/main/java;
 |-------------|---------|-------------|
 | Java | 8+ | JDK for compiling and running |
 | MySQL | 5.7+ | Database server |
-| JDBC Driver | 8.0+ | MySQL Connector/J |
+| JDBC Driver | 8.0+ | MySQL Connector/J |java -cp "src/main/java;mysql-connector-java-8.0.33.jar" library.Main
 
 ## 🚀 Setup Instructions
 

@@ -18,7 +18,7 @@ public class LibraryDAO {
             stmt.executeUpdate();
             System.out.println("Book added successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error adding book: " + e.getMessage());
         }
     }
 
@@ -40,9 +40,17 @@ public class LibraryDAO {
                 books.add(book);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error retrieving books: " + e.getMessage());
         }
         return books;
+    }
+
+    public void addSampleBooks() {
+        if (getAllBooks().isEmpty()) {
+            addBook(new Book(1, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 1925, true));
+            addBook(new Book(2, "To Kill a Mockingbird", "Harper Lee", "Fiction", 1960, true));
+            addBook(new Book(3, "1984", "George Orwell", "Dystopian", 1949, false));
+        }
     }
 
     public void updateBook(Book book) {
@@ -58,7 +66,7 @@ public class LibraryDAO {
             stmt.executeUpdate();
             System.out.println("Book updated successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error updating book: " + e.getMessage());
         }
     }
 
@@ -70,7 +78,7 @@ public class LibraryDAO {
             stmt.executeUpdate();
             System.out.println("Book deleted successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error deleting book: " + e.getMessage());
         }
     }
 
@@ -114,7 +122,7 @@ public class LibraryDAO {
                 books.add(book);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Search error: " + e.getMessage());
         }
         return books;
     }
@@ -129,7 +137,7 @@ public class LibraryDAO {
                 return rs.getBoolean("availability");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Availability check error: " + e.getMessage());
         }
         return false;
     }
